@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 
-
-
-
-
 class Program
+{
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
         Console.WriteLine("Please Enter Birth:");
         var inputDate = Console.ReadLine();
 
@@ -21,56 +17,51 @@ class Program
         Console.WriteLine(converDate.ToString("yyyy/MM/dd"));
         Console.ReadLine();
     }
-    }
-    public class PersianCulture : CultureInfo
+}
+
+
+public class PersianCulture : CultureInfo
+{
+    private readonly Calendar cal;
+    private readonly Calendar[] optionals;
+
+    public PersianCulture(string cultureName, bool useUserOverride)
+        : base(cultureName, useUserOverride)
     {
-        private readonly Calendar cal;
-        private readonly Calendar[] optionals;
-
-        public PersianCulture(): this("fa-IR", true)
-        {
-        }
-
-        public PersianCulture(string cultureName, bool useUserOverride)
-            : base(cultureName, useUserOverride)
-        {
-           
-            cal = base.OptionalCalendars[0];
-
-            
-            var optionalCalendars = new List<Calendar>();
-            optionalCalendars.AddRange(base.OptionalCalendars);
-            optionalCalendars.Insert(0, new PersianCalendar());
+        cal = base.OptionalCalendars[0];
 
 
-  
-            Type calendarType = typeof(Calendar);
+        var optionalCalendars = new List<Calendar>();
+        optionalCalendars.AddRange(base.OptionalCalendars);
+        optionalCalendars.Insert(0, new PersianCalendar());
 
 
-            PropertyInfo idProperty = calendarType.GetProperty("ID", BindingFlags.Instance | BindingFlags.NonPublic);
-   
 
-            //populating new list of optional calendar ids
-            var newOptionalCalendarIDs = new Int32[optionalCalendars.Count];
-            for (int i = 0; i < newOptionalCalendarIDs.Length; i++)
-                newOptionalCalendarIDs[i] = (Int32)idProperty.GetValue(optionalCalendars[i], null);
+        Type calendarType = typeof(Calendar);
 
-           
 
-            optionals = optionalCalendars.ToArray();
-            cal = optionals[0];
-            DateTimeFormat.Calendar = optionals[0];
+        PropertyInfo idProperty = calendarType.GetProperty("ID", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        }
 
-        public override Calendar Calendar
-        {
-            get { return cal; }
-        }
+        var newOptionalCalendarIDs = new Int32[optionalCalendars.Count];
+        for (int i = 0; i < newOptionalCalendarIDs.Length; i++)
+            newOptionalCalendarIDs[i] = (Int32)idProperty.GetValue(optionalCalendars[i], null);
 
-        public override Calendar[] OptionalCalendars
-        {
-            get { return optionals; }
-        }
+
+        optionals = optionalCalendars.ToArray();
+        cal = optionals[0];
+        DateTimeFormat.Calendar = optionals[0];
+
     }
+
+    public override Calendar Calendar
+    {
+        get { return cal; }
+    }
+
+    public override Calendar[] OptionalCalendars
+    {
+        get { return optionals; }
+    }
+}
 
